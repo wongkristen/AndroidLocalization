@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">"LocalizationAndDailyPath "</string>
+    <string name="gps_not_enabled">GPS Not Enabled</string>
+    <string name="go_to_settings">Go to settings</string>
+    <string name="your_current_location">Your current location:</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="address">Address:</string>
+    <string name="check_in">Check In</string>
+</resources>

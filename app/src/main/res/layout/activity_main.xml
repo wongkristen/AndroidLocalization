@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:background="@android:color/white"
+    tools:context="com.kristenwong.localizationanddailypath.MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/your_current_location"
+        android:textSize="20sp"
+        android:textColor="@android:color/black"
+        android:layout_marginTop="20sp"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="20sp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/latitude"
+            android:layout_gravity="start"
+            android:layout_marginStart="20dp"
+            android:textSize="17sp"
+            android:textStyle="italic"
+            android:textColor="@android:color/black"
+            />
+
+        <TextView
+            android:id="@+id/text_latitude_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0.000"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"
+            android:layout_marginEnd="20dp"
+            android:layout_alignParentEnd="true"
+            />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/longitude"
+            android:layout_gravity="start"
+            android:layout_marginStart="40dp"
+            android:textSize="17sp"
+            android:textStyle="italic"
+            android:textColor="@android:color/black"/>
+
+        <TextView
+            android:id="@+id/text_longitude_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0.000"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"
+            android:layout_marginEnd="40dp"
+            android:layout_gravity="end"
+            android:layout_alignParentEnd="true"/>
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/address"
+        android:layout_margin="20dp"
+        android:layout_gravity="start"
+        android:textSize="17sp"
+        android:textStyle="italic"
+        android:textColor="@android:color/black"/>
+
+    <TextView
+        android:id="@+id/text_address_1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="address line 1"
+        android:layout_gravity="start"
+        android:layout_marginStart="40dp"
+        android:textColor="@android:color/black"/>
+
+    <Button
+        android:id="@+id/button_checkin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/check_in"/>
+
+</LinearLayout>
