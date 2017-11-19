@@ -64,10 +64,11 @@ public class CheckInsManager {
         try {
             locationCursor.moveToFirst();
 
+            Log.d(MAIN_DEBUG_TAG, "addCheckIn: initialized location cursor");
             while(!locationCursor.isAfterLast()) {
-//                TODO: check if the check in is within 30m of previous locations
-
+                Log.d(MAIN_DEBUG_TAG, "addCheckIn: loop iteration - checking within 30m");
                 SavedLocation location = locationCursor.getSavedLocation();
+
                 if(calculateWithin30m(checkIn.getLatitude(),
                                       checkIn.getLongitude(),
                                       location.getLatitude(),
@@ -77,12 +78,14 @@ public class CheckInsManager {
                     newLocation = false;
                     break;
                 }
+                locationCursor.moveToNext();
             }
         } finally {
             locationCursor.close();
         }
 
         if (newLocation) {
+            Log.d(MAIN_DEBUG_TAG, "addCheckIn: adding new location");
             SavedLocation location = new SavedLocation();
             location.setName(checkIn.getName());
             location.setLatitude(checkIn.getLatitude());
@@ -94,10 +97,21 @@ public class CheckInsManager {
         mDatabase.insert(CheckInsTable.NAME, null, values);
     }
 
+    public void addSavedLocation(SavedLocation savedLocation) {
+        mDatabase.insert(LocationsTable.NAME, null, getLocationContentValues(savedLocation));
+    }
+
     public void updateCheckIn(CheckIn checkIn) {
         String uuid = checkIn.getUuid().toString();
         ContentValues values = getCheckInContentValues(checkIn);
         mDatabase.update(CheckInsTable.NAME, values, CheckInsTable.Columns.UUID +
+                            " = ?", new String[] {uuid});
+    }
+
+    public void updateSavedLocation(SavedLocation savedLocation) {
+        String uuid = savedLocation.getUuid().toString();
+        ContentValues values = getLocationContentValues(savedLocation);
+        mDatabase.update(LocationsTable.NAME, values, LocationsTable.Columns.UUID +
                             " = ?", new String[] {uuid});
     }
 
@@ -126,22 +140,45 @@ public class CheckInsManager {
     }
 
     public List<CheckIn> getCheckIns() {
-        Log.d(MAIN_DEBUG_TAG, "getCheckIns: called");
         List<CheckIn> checkIns = new ArrayList<>();
 
-        CheckInCursorWrapper cursor = queryCheckIns(null, null);
-        Log.d(MAIN_DEBUG_TAG, "getCheckIns: queryCheckIns called and returned");
+//        CheckInCursorWrapper cursor = queryCheckIns(null, null);
+//        Query check ins in alphabetical order by name
+        Cursor c = mDatabase.query(CheckInsTable.NAME,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        CheckInsTable.Columns.NAME + " ASC");
+        CheckInCursorWrapper cursor = new CheckInCursorWrapper(c);
+
         try {
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
                 checkIns.add(cursor.getCheckIn());
                 cursor.moveToNext();
             }
-            Log.d(MAIN_DEBUG_TAG, "getCheckIns: cursor moved through checkins");
         } finally {
             cursor.close();
         }
         return checkIns;
+    }
+
+    public List<SavedLocation> getSavedLocations() {
+        List<SavedLocation> savedLocations = new ArrayList<>();
+        CheckInCursorWrapper cursor = queryLocations(null, null);
+
+        try {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                savedLocations.add(cursor.getSavedLocation());
+                cursor.moveToNext();
+            }
+        } finally {
+            cursor.close();
+        }
+        return savedLocations;
     }
 
     public CheckIn getCheckIn(UUID uuid) {
@@ -157,9 +194,32 @@ public class CheckInsManager {
         }
     }
 
-    private boolean calculateWithin30m(double lat1, double lon1, double lat2, double lon2) {
-        float ans[] = {};
-        Location.distanceBetween(lat1, lon1, lat1, lon2, ans);
+    public CheckIn getLatestCheckin(String locationName) {
+        Cursor cursor;
+        cursor = mDatabase.query(CheckInsTable.NAME,
+                null,
+                CheckInsTable.Columns.NAME + " = ?",
+                new String[] {locationName},
+                null,
+                null,
+                CheckInsTable.Columns.TIME + " DESC",
+                "1");
+
+        CheckInCursorWrapper checkInCursor = new CheckInCursorWrapper(cursor);
+        try{
+            checkInCursor.moveToFirst();
+            if (!checkInCursor.isAfterLast()) {
+                return checkInCursor.getCheckIn();
+            }
+        } finally {
+            checkInCursor.close();
+        }
+        return null;
+    }
+
+    public boolean calculateWithin30m(double lat1, double lon1, double lat2, double lon2) {
+        float ans[] = {1, 1, 1};
+        Location.distanceBetween(lat1, lon1, lat2, lon2, ans);
         return (ans[0] <= 30);
     }
 }

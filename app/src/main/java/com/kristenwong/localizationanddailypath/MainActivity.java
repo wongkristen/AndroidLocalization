@@ -21,20 +21,27 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends Activity {
     private double lat, lon;
     private TextView mLatitude, mLongitude, mAddress1, mAddress2, mAddress3;
-    private Button mCheckInButton;
+    private ListView mCheckInList;
+    private Button mCheckInButton, mViewMapButton;
     private Context mContext;
     private CheckInsManager mCheckInsManager;
+    private CheckInListAdapter mAdapter;
     private static final String MAIN_DEBUG_TAG = "MainActivity";
+    private static final String LAT_KEY = "latitude";
+    private static final String LON_KEY = "longitude";
     private String mFullAddress;
 
     @Override
@@ -49,6 +56,11 @@ public class MainActivity extends Activity {
         mLongitude = (TextView) findViewById(R.id.text_longitude_value);
         mAddress1 = (TextView) findViewById(R.id.text_address_1);
         mCheckInButton = (Button) findViewById(R.id.button_checkin);
+        mViewMapButton = (Button) findViewById(R.id.button_view_map);
+        mCheckInList = (ListView) findViewById(R.id.listview_checkins);
+
+        mAdapter = new CheckInListAdapter(mCheckInsManager.getCheckIns(), getApplicationContext());
+        mCheckInList.setAdapter(mAdapter);
 
         final LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         setLatAndLong(locationManager);
@@ -97,12 +109,21 @@ public class MainActivity extends Activity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String checkInName = editText.getText().toString();
-                        CheckIn checkIn = new CheckIn(checkInName, lat, lon, mFullAddress, Calendar.getInstance().getTime().toString());
+                        android.text.format.DateFormat df = new android.text.format.DateFormat();
+                        df.format("yyyy-MM-dd hh:mm:ss a", new java.util.Date());
+
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
+                        Calendar calendar = Calendar.getInstance();
+                        Date now = calendar.getTime();
+                        String time = simpleDateFormat.format(now);
+
+                        CheckIn checkIn = new CheckIn(checkInName, lat, lon, mFullAddress, time);
                         mCheckInsManager.addCheckIn(checkIn);
+                        mAdapter.updateList(mCheckInsManager.getCheckIns());
 
                         List<CheckIn> checkInList = mCheckInsManager.getCheckIns();
                         for (CheckIn c: checkInList) {
-                            Log.d(MAIN_DEBUG_TAG, "saved check in: " + c.getName() + " " + c.getTime() + " " + c.getUuid());
+                            Log.d(MAIN_DEBUG_TAG, "saved check in: " + c.getName() + " " + c.getTime() + " " + c.getLatitude() + " " + c.getLongitude() + " " + c.getUuid());
                         }
                     }
                 });
@@ -118,6 +139,18 @@ public class MainActivity extends Activity {
             }
 
 
+        });
+
+        mViewMapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setLatAndLong(locationManager);
+
+                Intent intent = new Intent(getApplicationContext(), MapActivity.class);
+                intent.putExtra(LAT_KEY, lat);
+                intent.putExtra(LON_KEY, lon);
+                startActivity(intent);
+            }
         });
     }
 

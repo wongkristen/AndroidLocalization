@@ -7,4 +7,8 @@
     <string name="longitude">Longitude</string>
     <string name="address">Address:</string>
     <string name="check_in">Check In</string>
+    <string name="title_activity_map">Map</string>
+    <string name="view_map">View Map</string>
+    <string name="my_location">My Location</string>
+
 </resources>
