@@ -19,9 +19,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -55,6 +57,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
+        MapsInitializer.initialize(getApplicationContext());
 
         Bundle bundle = getIntent().getExtras();
         mLat = bundle.getDouble(LAT_KEY);
@@ -140,6 +144,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                     }
                 });
 
+                alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                });
+
                 alertDialog.show();
             }
         });
@@ -170,7 +181,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000*3, 0, new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 mCurrentLocation = location;
@@ -189,7 +200,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                             location.getLongitude())) {
                         Log.d(MAIN_DEBUG_TAG, "Map onLocationChanged: found location within 30m, searching for last checkin");
 
-                        CheckIn checkIn = mCheckInsManager.getLatestCheckin(savedLocation.getName());
+                        CheckIn checkIn = mCheckInsManager.getLatestCheckin(savedLocation.getAddress());
                         if (checkIn != null) {
                             Log.d(MAIN_DEBUG_TAG, "Map onLocationChanged: obtained lasted checkin, creating alertdialog");
                             mNearbyAlertBuilder.setMessage("Last check in:\n" + checkIn.getName() + "\n" + checkIn.getTime());

@@ -10,5 +10,6 @@
     <string name="title_activity_map">Map</string>
     <string name="view_map">View Map</string>
     <string name="my_location">My Location</string>
-
+    <string name="previous_check_ins">Previous Check Ins</string>
+    <string name="map_view">Map View</string>
 </resources>

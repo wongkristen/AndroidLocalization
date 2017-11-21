@@ -2,9 +2,11 @@ package com.kristenwong.localizationanddailypath;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Address;
@@ -42,6 +44,9 @@ public class MainActivity extends Activity {
     private static final String MAIN_DEBUG_TAG = "MainActivity";
     private static final String LAT_KEY = "latitude";
     private static final String LON_KEY = "longitude";
+    private static final String SERVICE_LAT_KEY = "service lat";
+    private static final String SERVICE_LON_KEY = "service lon";
+    private static final String ACTION_UPDATE_LIST = "action update list";
     private String mFullAddress;
 
     @Override
@@ -67,10 +72,19 @@ public class MainActivity extends Activity {
         final Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         setScreenText(geocoder);
 
+        Intent serviceIntent = new Intent(this, LocationService.class);
+        serviceIntent.putExtra(SERVICE_LAT_KEY, lat);
+        serviceIntent.putExtra(SERVICE_LON_KEY, lon);
+        startService(serviceIntent);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_UPDATE_LIST);
+        registerReceiver(new LocationServiceBroadcastReceiver(), filter);
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000*3, 0, new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 setLatAndLong(locationManager);
@@ -103,6 +117,7 @@ public class MainActivity extends Activity {
                 alertDialog.setMessage("Enter name for check in:");
 
                 final EditText editText = new EditText(getApplicationContext());
+                editText.setPadding(20, 0, 20, 0);
                 alertDialog.setView(editText);
 
                 alertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
@@ -235,5 +250,17 @@ public class MainActivity extends Activity {
             Log.d(MAIN_DEBUG_TAG, "setScreenText: geocoder error");
         }
 
+    }
+
+    private class LocationServiceBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(MAIN_DEBUG_TAG, "MainActivity: receiving service broadcast");
+            if (intent.getAction().equals(ACTION_UPDATE_LIST)) {
+                Log.d(MAIN_DEBUG_TAG, "MainActivity: received service broadcast, updating list");
+                List<CheckIn> checkIns = mCheckInsManager.getCheckIns();
+                mAdapter.updateList(checkIns);
+            }
+        }
     }
 }

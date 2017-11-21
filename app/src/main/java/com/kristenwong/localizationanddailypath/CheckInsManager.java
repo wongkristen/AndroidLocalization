@@ -142,7 +142,6 @@ public class CheckInsManager {
     public List<CheckIn> getCheckIns() {
         List<CheckIn> checkIns = new ArrayList<>();
 
-//        CheckInCursorWrapper cursor = queryCheckIns(null, null);
 //        Query check ins in alphabetical order by name
         Cursor c = mDatabase.query(CheckInsTable.NAME,
                         null,
@@ -194,12 +193,12 @@ public class CheckInsManager {
         }
     }
 
-    public CheckIn getLatestCheckin(String locationName) {
+    public CheckIn getLatestCheckin(String locationAddress) {
         Cursor cursor;
         cursor = mDatabase.query(CheckInsTable.NAME,
                 null,
-                CheckInsTable.Columns.NAME + " = ?",
-                new String[] {locationName},
+                CheckInsTable.Columns.ADDRESS + " = ?",
+                new String[] {locationAddress},
                 null,
                 null,
                 CheckInsTable.Columns.TIME + " DESC",
